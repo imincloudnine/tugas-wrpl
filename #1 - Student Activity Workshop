@@ -1,7 +1,7 @@
-# [US-1] Sebagai dosen, saya ingin membuat kelas baru, agar saya dapat memfasilitasi pembelajaran
+# [US-1] Sebagai pembeli, saya ingin mendaftar aku baru, agar saya dapat meletakkan pesanan terbaru
 
 ## Deskripsi
-Sebagai dosen, saya perlu memiliki kemampuan untuk membuat kelas baru untuk mata kuliah yang saya ajar. Saat membuat kelas, saya perlu memasukkan informasi dasar seperti nama kelas, deskripsi, dan jadwal.
+Sebagai pembeli, saya perlu memiliki kemampuan untuk membuat akun baru untuk memesan bunga. Saat membuat akun, saya perlu memasukkan informasi dasar seperti nama, email, no telp, dan alamat.
 
 ## Acceptance Criteria
 - [ ] Dapat mengakses form pembuatan kelas dari dashboard dosen
