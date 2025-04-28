@@ -1,0 +1,25 @@
+# [US-1] Sebagai dosen, saya ingin membuat kelas baru, agar saya dapat memfasilitasi pembelajaran
+
+## Deskripsi
+Sebagai dosen, saya perlu memiliki kemampuan untuk membuat kelas baru untuk mata kuliah yang saya ajar. Saat membuat kelas, saya perlu memasukkan informasi dasar seperti nama kelas, deskripsi, dan jadwal.
+
+## Acceptance Criteria
+- [ ] Dapat mengakses form pembuatan kelas dari dashboard dosen
+- [ ] Form memiliki field wajib: nama kelas, deskripsi, jadwal
+- [ ] Sistem menghasilkan kode kelas unik secara otomatis
+- [ ] Kelas baru muncul di daftar kelas dosen setelah dibuat
+- [ ] Notifikasi sukses ditampilkan setelah kelas berhasil dibuat
+- [ ] Validasi untuk mencegah duplikasi nama kelas
+
+# [US-1] Sebagai dosen, saya ingin membuat kelas baru, agar saya dapat memfasilitasi pembelajaran
+
+## Deskripsi
+Sebagai dosen, saya perlu memiliki kemampuan untuk membuat kelas baru untuk mata kuliah yang saya ajar. Saat membuat kelas, saya perlu memasukkan informasi dasar seperti nama kelas, deskripsi, dan jadwal.
+
+## Acceptance Criteria
+- [ ] Dapat mengakses form pembuatan kelas dari dashboard dosen
+- [ ] Form memiliki field wajib: nama kelas, deskripsi, jadwal
+- [ ] Sistem menghasilkan kode kelas unik secara otomatis
+- [ ] Kelas baru muncul di daftar kelas dosen setelah dibuat
+- [ ] Notifikasi sukses ditampilkan setelah kelas berhasil dibuat
+- [ ] Validasi untuk mencegah duplikasi nama kelas
