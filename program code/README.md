@@ -4,5 +4,5 @@ Bouquetshop adalah sebuah website ecommerce yang dirancang khusus untuk pengelol
 Bouquetshop dibuat untuk memberikan pengalaman belanja bunga yang praktis, cepat, dan aman, baik bagi customer maupun pengelola toko.
 
 ## Spesifikasi program
-- [] menggunakan streamlit sebagai user interface
-- [] database dengan mysql
+- menggunakan streamlit sebagai user interface
+- database dengan mysql
