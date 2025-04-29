@@ -1,27 +1,130 @@
 Raw Text - Sudah ada di issues
 
-# [US-1] Sebagai pembeli, saya ingin mendaftar aku baru, agar saya dapat meletakkan pesanan terbaru
+# [US - Sign Up Customer]  Sebagai customer, saya ingin mendaftar akun ke dalam sistem, agar saya dapat login dan mengakses fitur-fitur khusus customer.
 
 ## Deskripsi
-Sebagai pembeli, saya perlu memiliki kemampuan untuk membuat akun baru untuk memesan bunga. Saat membuat akun, saya perlu memasukkan informasi dasar seperti nama, email, no telp, dan alamat.
+Sebagai customer baru, saya perlu memiliki kemampuan untuk mendaftar akun agar bisa menggunakan fitur sistem. Saat mendaftar, saya perlu memasukkan data diri seperti nama lengkap, username, email, dan password, yang nantinya akan disimpan ke dalam database.
 
 ## Acceptance Criteria
-- [ ] Dapat mengakses form pembuatan kelas dari dashboard dosen
-- [ ] Form memiliki field wajib: nama kelas, deskripsi, jadwal
-- [ ] Sistem menghasilkan kode kelas unik secara otomatis
-- [ ] Kelas baru muncul di daftar kelas dosen setelah dibuat
-- [ ] Notifikasi sukses ditampilkan setelah kelas berhasil dibuat
-- [ ] Validasi untuk mencegah duplikasi nama kelas
+- [ ] Dapat mengakses halaman Sign Up Customer
+- [ ] Customer mengisi data: nama lengkap, email, nomor telepon, alamat, dan password
+- [ ] Sistem memvalidasi input, termasuk kesesuaian password dan konfirmasi password
+- [ ] Sistem memeriksa apakah username atau email sudah terdaftar
+- [ ] Customer dialihkan ke menu khusus customer (produk, pesanan, info akun).
+- [ ] Jika berhasil, sistem menampilkan pesan "Pendaftaran berhasil", memberikan username untuk customer, dan mengarahkan ke halaman login
+- [ ] Jika gagal, sistem menampilkan pesan kesalahan.
 
-# [US-1] Sebagai dosen, saya ingin membuat kelas baru, agar saya dapat memfasilitasi pembelajaran
+____________________________________________________________________________
+
+# [US - Login Customer] Sebagai customer, saya ingin login ke dalam sistem, agar saya dapat mengakses fitur-fitur khusus customer.
 
 ## Deskripsi
-Sebagai dosen, saya perlu memiliki kemampuan untuk membuat kelas baru untuk mata kuliah yang saya ajar. Saat membuat kelas, saya perlu memasukkan informasi dasar seperti nama kelas, deskripsi, dan jadwal.
+Sebagai customer, saya perlu memiliki kemampuan login ke dalam sistem untuk mengakses fitur-fitur customer yang terdapat dalam sistem. Saat login, saya perlu memasukkan username dan password milik saya yang sudah terdaftar dalam database.
 
 ## Acceptance Criteria
-- [ ] Dapat mengakses form pembuatan kelas dari dashboard dosen
-- [ ] Form memiliki field wajib: nama kelas, deskripsi, jadwal
-- [ ] Sistem menghasilkan kode kelas unik secara otomatis
-- [ ] Kelas baru muncul di daftar kelas dosen setelah dibuat
-- [ ] Notifikasi sukses ditampilkan setelah kelas berhasil dibuat
-- [ ] Validasi untuk mencegah duplikasi nama kelas
+- [ ] Dapat mengakses halaman Login Customer
+- [ ] Customer memasukkan username dan password
+- [ ] Sistem memeriksa apakah username dan password terdaftar dalam database
+- [ ] Jika berhasil, pesan selamat datang akan muncul
+- [ ] Customer dialihkan ke menu khusus customer (produk, pesanan, info akun).
+- [ ] Jika gagal, sistem menampilkan pesan kesalahan.
+
+____________________________________________________________________________
+
+# [US - Login Admin] Sebagai admin, saya ingin login ke dalam sistem, agar saya dapat mengakses fitur-fitur khusus admin.
+
+## Deskripsi
+Sebagai admin, saya perlu memiliki kemampuan login ke dalam sistem untuk mengakses fitur-fitur admin yang terdapat dalam sistem. Saat login, saya perlu memasukkan username dan password milik saya yang sudah terdaftar dalam database.
+
+## Acceptance Criteria
+- [ ] Dapat mengakses halaman Login Admin
+- [ ] Admin memasukkan username dan password
+- [ ] Sistem memeriksa apakah username dan password terdaftar dalam database
+- [ ] Jika berhasil, pesan selamat datang akan muncul
+- [ ] Admin dialihkan ke menu khusus admin (dashboard, kelola data, laporan pendapatan).
+- [ ] Jika gagal, sistem menampilkan pesan kesalahan.
+____________________________________________________________________________
+
+# [US - Perbarui Stok Bunga] Sebagai admin, saya ingin memperbarui stok bunga, agar data stok selalu akurat dan terbaru.
+
+## Deskripsi
+Sebagai admin, saya perlu memiliki kemampuan untuk menambahkan jumlah stok bunga. Saat memperbarui stok bunga, saya dapat memilih bunga berdasarkan nama bunga dan memasukkan jumlah stok baru.
+
+## Acceptance Criteria
+- [ ] Admin dapat mengakses menu Perbarui Stock Bunga setelah login
+- [ ] Admin dapat memilih nama bunga dari dropdown
+- [ ] Admin dapat memasukkan jumlah stok yang ingin ditambahkan
+- [ ] Setelah menekan tombol tambah stok, stok bunga akan diperbarui dalam database
+- [ ] Jika berhasil, sistem menampilkan pesan stok berhasil ditambahkan
+- [ ] Jika terjadi error, sistem menampilkan pesan error
+____________________________________________________________________________
+
+# [US - Ganti Password Customer] Sebagai customer, saya ingin mengganti password,agar saya dapat menjaga keamanan akun saya dan mencegah akses oleh pihak yang tidak berwenang.
+
+## Deskripsi
+Sebagai customer, saya perlu memiliki kemampuan untuk mengganti password secara mandiri. Saat mengganti password, saya perlu verifikasi lama dan input password baru yang dikonfirmasi ulang.
+
+## Acceptance Criteria
+- [ ] Dapat mengakses menu Ganti Password
+- [ ] Halaman ganti password memiliki field: password lama, password baru, konfirmasi password baru
+- [ ] Konfirmasi password baru harus cocok dengan password baru
+- [ ] Pesan “Password berhasil diganti” muncul setelah perubahan berhasil dibuat
+- [ ] Jika terjadi kesalahan, sistem menampilkan pesan kesalahan yang jelas
+
+____________________________________________________________________________
+
+# [US - Perbarui Status Pesanan Admin] Sebagai admin, saya ingin memperbarui status pesanan, agar saya dapat memantau dan mengelola proses pemesanan.
+
+## Deskripsi
+Sebagai admin, saya perlu memiliki kemampuan untuk memperbarui status pesanan berdasarkan Order ID. Saat memperbarui status, Saya dapat memilih status dari beberapa opsi yang telah ditentukan (processed, shipped, completed, cancelled).
+
+## Acceptance Criteria
+- [ ] Dapat mengakses menu Perbarui Status Pesanan
+- [ ] Halaman perbarui status memiliki field: Order ID dan pilihan status (processed, shipped, completed, cancelled)
+- [ ] Sistem hanya menerima Order ID yang terdaftar
+- [ ] Pesan “Status pesanan berhasil diperbarui” muncul setelah perubahan berhasil dibuat
+- [ ] Jika terjadi kesalahan, sistem menampilkan pesan kesalahan yang jelas
+
+____________________________________________________________________________
+
+# [US- Membuat Pesanan Customer] Sebagai Customer, saya ingin dapat membuat pesanan untuk buket bunga, agar saya dapat membeli bunga yang saya inginkan.
+
+## Deskripsi
+Sebagai customer, saya ingin dapat memilih bunga, menentukan jumlah tangkai, dan memilih metode pembayaran, sehingga saya dapat membuat pesanan untuk buket bunga yang saya inginkan.
+
+## Acceptance Criteria
+- [ ] Customer dapat memilih bunga dari daftar yang tersedia.
+- [ ] Customer dapat menentukan jumlah tangkai yang ingin dipesan.
+- [ ] Customer dapat memilih metode pembayaran (Cash, OVO, Gopay, Dana).
+- [ ] Setelah mengklik tombol "Buat Pesanan", sistem harus menyimpan pesanan dan memberikan konfirmasi dengan order ID.
+- [ ] Jika ada kesalahan, sistem harus menampilkan pesan error yang sesuai.
+
+____________________________________________________________________________
+
+# [US - Memperbarui Harga Bunga] Sebagai admin, saya ingin dapat memperbarui harga bunga, agar saya dapat mengelola harga produk dengan tepat.
+
+## Deskripsi
+Sebagai admin, saya ingin dapat memasukkan ID bunga dan harga baru, sehingga saya dapat memperbarui harga bunga di database sesuai dengan kebijakan harga terbaru.
+
+## Acceptance Criteria
+- [ ] Admin dapat memasukkan ID bunga yang ingin diperbarui.
+- [ ] Admin dapat memasukkan harga baru untuk bunga tersebut.
+- [ ] Setelah mengklik tombol "Update Harga", sistem harus memperbarui harga bunga di database dan memberikan konfirmasi bahwa harga telah diperbarui.
+- [ ] Jika ID bunga tidak valid atau terjadi kesalahan, sistem harus menampilkan pesan error yang sesuai.
+
+____________________________________________________________________________
+
+# [US - Lihat Pendapatan Berdasarkan Tanggal Admin] Sebagai admin, saya ingin melihat laporan pendapatan berdasarkan rentang tanggal, agar saya dapat memantau performa penjualan dalam periode tertentu.
+
+## Deskripsi
+Sebagai admin, saya perlu memiliki kemampuan untuk melihat total pendapatan dari transaksi yang telah selesai (status completed) dalam rentang tanggal tertentu. Hal ini memungkinkan saya untuk memantau penjualan dan mengevaluasi performa bisnis.
+
+## Acceptance Criteria
+- [ ] Admin dapat mengakses menu Laporan Pendapatan setelah login.
+- [ ] Admin dapat memilih tanggal mulai dan tanggal akhir dari input tanggal.
+- [ ] Sistem menampilkan daftar pesanan dengan status “completed” dalam rentang tanggal yang dipilih.
+- [ ] Sistem menghitung dan menampilkan total pendapatan dari pesanan pada rentang tanggal tersebut.
+- [ ] Jika berhasil, sistem akan menunjukkan total pendapatan pada tanggal yang ditentukan.
+- [ ] Jika tidak ada pesanan yang ditemukan, sistem menampilkan pesan “Tidak ada data pendapatan pada rentang tanggal tersebut”.
+- [ ] Jika gagal, sistem menampilkan pesan kesalahan.
+
