@@ -1081,7 +1081,7 @@ elif st.session_state.user_info['role'] == 'customer':
                         st.text_input("Email", value=info['email'], disabled=True)
                         st.text_input("Username", value=info['username'], disabled=True)
                     with col2:
-                        st.text_input("Nama Belang", value=info['lastName'], disabled=True)
+                        st.text_input("Nama Belakang", value=info['lastName'], disabled=True)
                         st.text_input("Nomor Telepon", value=info['phoneNumber'], disabled=True)
                     st.text_area("Alamat", value=info['address'], disabled=True)
                 else:
