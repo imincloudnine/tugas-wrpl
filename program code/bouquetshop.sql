@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Apr 28, 2025 at 08:01 AM
+-- Generation Time: May 02, 2025 at 03:14 PM
 -- Server version: 8.0.30
 -- PHP Version: 8.1.10
 
@@ -27,9 +27,10 @@ DELIMITER $$
 --
 CREATE DEFINER=`root`@`localhost` PROCEDURE `AddCustomer` (IN `p_firstName` VARCHAR(50), IN `p_lastName` VARCHAR(50), IN `p_email` VARCHAR(100), IN `p_phoneNumber` VARCHAR(20), IN `p_address` TEXT)   BEGIN
     DECLARE new_custID INT;
-
-    -- Ambil nilai custID terbesar dan tambahkan 1
-    SELECT IFNULL(MAX(custID), 0) + 1 INTO new_custID FROM Customers;
+	
+    -- Ambil ID baru dari tabel UserSequence
+    UPDATE UserSequence SET last_userID = last_userID + 1 WHERE id = 1;
+    SELECT last_userID INTO new_custID FROM UserSequence WHERE id = 1;
 
     -- Masukkan data customer baru
     INSERT INTO Customers (custID, firstName, lastName, email, phoneNumber, address)
@@ -1133,9 +1134,7 @@ INSERT INTO `customers` (`custID`, `firstName`, `lastName`, `email`, `phoneNumbe
 (997, 'Filmore', 'Babington', 'fbabingtonro@europa.eu', '312-924-4085', '92653 Elgar Hill'),
 (998, 'Miller', 'Burnett', 'mburnettrp@drupal.org', '747-372-8132', '38 Blaine Circle'),
 (999, 'Tracee', 'Odam', 'todamrq@edublogs.org', '888-124-2058', '19188 Lake View Lane'),
-(1000, 'Brandie', 'Dyhouse', 'bdyhouserr@youtu.be', '609-956-7618', '189 Daystar Way'),
-(1001, 'Harley', 'Menesty', 'harley123@smi.le', '187-903-273', '7 Jacque Street '),
-(1002, 'lala', 'g', 'sd@wd.com', '88', 'yhigg');
+(1000, 'Brandie', 'Dyhouse', 'bdyhouserr@youtu.be', '609-956-7618', '189 Daystar Way');
 
 -- --------------------------------------------------------
 
@@ -8274,11 +8273,11 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`bungaID`, `bungaName`, `hargaPerTangkai`, `stock`) VALUES
-(1, 'Mawar', 5000, 1280),
-(2, 'Matahari', 6000, 732),
+(1, 'Mawar', 5000, 1278),
+(2, 'Matahari', 6000, 990),
 (3, 'Lily', 7000, 1084),
-(4, 'Tulip', 8000, 1313),
-(5, 'Hyacinth', 9000, 1641);
+(4, 'Tulip', 8000, 1312),
+(5, 'Hyacinth', 9000, 1640);
 
 -- --------------------------------------------------------
 
@@ -8299,7 +8298,7 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`userID`, `username`, `password`, `role`) VALUES
 (0, 'admin', 'admin123', 'admin'),
-(1, 'customer1', 'cust111', 'customer'),
+(1, 'customer1', 'cust123', 'customer'),
 (2, 'customer2', 'abeauchamp0', 'customer'),
 (3, 'customer3', 'bduckinfield1', 'customer'),
 (4, 'customer4', 'hchamberlayne2', 'customer'),
@@ -9298,9 +9297,25 @@ INSERT INTO `users` (`userID`, `username`, `password`, `role`) VALUES
 (997, 'customer997', 'bgergern', 'customer'),
 (998, 'customer998', 'dmartinaro', 'customer'),
 (999, 'customer999', 'lofeeneyrp', 'customer'),
-(1000, 'customer1000', 'hprayerrq', 'customer'),
-(1001, 'customer1001', 'harley', 'customer'),
-(1002, 'customer1002', '0', 'customer');
+(1000, 'customer1000', 'hprayerrq', 'customer');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `usersequence`
+--
+
+CREATE TABLE `usersequence` (
+  `id` int NOT NULL,
+  `last_userID` int DEFAULT NULL
+) ;
+
+--
+-- Dumping data for table `usersequence`
+--
+
+INSERT INTO `usersequence` (`id`, `last_userID`) VALUES
+(1, 1000);
 
 --
 -- Indexes for dumped tables
@@ -9347,6 +9362,12 @@ ALTER TABLE `users`
   ADD UNIQUE KEY `username` (`username`);
 
 --
+-- Indexes for table `usersequence`
+--
+ALTER TABLE `usersequence`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -9360,7 +9381,7 @@ ALTER TABLE `ordersequence`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `userID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1003;
+  MODIFY `userID` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1007;
 
 --
 -- Constraints for dumped tables
