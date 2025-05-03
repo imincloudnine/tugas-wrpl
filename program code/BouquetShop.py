@@ -2,6 +2,142 @@ import streamlit as st
 import mysql.connector
 import pandas as pd
 import matplotlib.pyplot as plt
+from PIL import Image
+import io
+
+# Styling
+st.markdown("""
+    <style>
+        .main {
+            background-color: #f8f9fa;
+        }
+        .stApp {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .product-card {
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            padding: 15px;
+            margin-bottom: 20px;
+            background: white;
+            transition: transform 0.2s;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        .header {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
+            margin-bottom: 20px;
+        }
+        .sidebar .sidebar-content {
+            background: linear-gradient(180deg, #fdfbfb 0%, #ebedee 100%);
+        }
+        .metric-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .btn-primary {
+            background-color: #ff6b6b;
+            color: #e75480;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+        .btn-primary:hover {
+            background-color: #ff5252;
+        }
+        input[type="text"], input[type="number"] {
+            color: #e75480 !important;
+            border: 1px solid #ddd !important;
+            border-radius: 8px !important;
+            padding: 6.25px !important;
+            border-top: 1px solid #ddd !important;
+        }
+        .stSelectbox > div > div {
+            color: #e75480 !important;
+            border: 1px solid #ddd !important;
+            border-radius: 6px !important;
+        }
+        .stSelectbox div[data-baseweb="select"] {
+            color: #e75480 !important;
+            border-radius: 6px !important;
+        }
+        input[type="text"]:focus, input[type="number"]:focus {
+            border-color: #888 !important;
+            outline: none !important;
+        }
+        .stSelectbox div[data-baseweb="select"]:hover {
+            border-color: #888 !important;
+        }
+        .stNumberInput button:hover {
+            background-color: #ddd !important;
+        }
+        .stNumberInput {
+            border-radius: 6px !important;
+        }
+        textarea {
+            color: white !important;
+            border: 1px solid #ddd !important;
+            border-radius: 8px !important;
+            padding: 6.25px !important;
+            border-top: 1px solid #ddd !important;
+        }
+        textarea:focus {
+            border-color: #888 !important;
+            outline: none !important;
+        }
+        input[type="password"] {
+            color: #e75480 !important;
+            border: 1px solid #ddd !important;
+            border-radius: 8px !important;
+            padding: 6.25px !important;
+            border-top: 1px solid #ddd !important;
+        }
+        input[type="password"]:focus {
+            border-color: #888 !important;
+            outline: none !important;
+        }
+            
+        .metric-card {
+            background: white;
+            border-radius: 10px;
+            padding: 10px !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+            min-height: 100px !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+        }
+        
+        .metric-card h3 {
+            font-size: 14px !important;
+            margin-bottom: 8px !important;
+            color: #666 !important;
+        }
+        
+        .metric-card h2 {
+            font-size: 18px !important;
+            font-weight: bold !important;
+            color: #ff6b6b !important;
+            margin: 0 !important;
+        }
+        
+        .metric-card div[style*="font-size:2em"] {
+            font-size: 20px !important;
+            margin-bottom: 5px !important;
+        }    
+    </style>
+""", unsafe_allow_html=True)
 
 # Fungsi untuk mendapatkan koneksi database
 def get_connection():
@@ -12,7 +148,79 @@ def get_connection():
         database="bouquetshop"
     )
 
-st.title("Bouquet Shop")
+# Header
+def show_header(title):
+    st.markdown(f"""
+        <div class="header">
+            <h1 style="margin:0; display:flex; align-items:center;">
+                <span style="margin-right:10px;">💐</span>
+                {title}
+            </h1>
+        </div>
+    """, unsafe_allow_html=True)
+
+# Fungsi untuk menampilkan produk dalam card
+def display_product_card(product):
+    col1, col2 = st.columns([1, 3])
+    with col1:
+        try:
+            # Asumsikan product[0] adalah ID produk (1, 2, 3, dst)
+            st.image(f"images/{product[0]}.jpg", width=150)
+        except:
+            st.image("https://via.placeholder.com/150x150.png?text=Bouquet", width=150)
+
+    with col2:
+        st.subheader(product[1])
+        st.markdown(f"**Harga:** Rp {product[2]:,.2f} per tangkai")
+        st.markdown(f"**Stok tersedia:** {product[3]} tangkai")
+        st.markdown(f"**ID Produk:** {product[0]}")
+        
+        if st.session_state.role == "customer":
+            with st.expander("Buat Pesanan"):
+                with st.form(key=f"order_form_{product[0]}"):
+                    paymentMethod = st.selectbox("Metode Pembayaran", ["Cash", "OVO", "Gopay", "Dana"], key=f"pay_{product[0]}")
+                    kuantitasTangkai = st.number_input("Jumlah Tangkai", min_value=1, max_value=10, step=1, key=f"qty_{product[0]}")
+                    custom = st.selectbox("Warna Custom", ["Pink", "Brown", "Blue", "Green", "Grey", "Yellow", "White", "Purple"], key=f"custom_{product[0]}")
+                    
+                    if st.form_submit_button("Pesan Sekarang", type="primary"):
+                        username = st.session_state.username
+                        custID = extract_cust_id_from_username(username)
+                        if custID:
+                            create_new_order(custID, paymentMethod, product[0], kuantitasTangkai, custom)
+                        else:
+                            st.error("Gagal membuat pesanan. Silakan login kembali.")
+
+# Fungsi untuk menampilkan produk dalam grid
+def display_products_grid():
+    try:
+        conn = get_connection()
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT * FROM products")
+            product_list = cursor.fetchall()
+
+            cols = st.columns(3)
+            for idx, product in enumerate(product_list):
+                with cols[idx % 3]:
+                    try:
+                        st.image(f"images/{product[0]}.jpg", use_container_width=True)
+                    except:
+                        st.image("https://via.placeholder.com/200x200.png?text=Bouquet", use_container_width=True)
+                    st.write(f"**{product[1]}**")
+                    st.write(f"Rp {product[2]:,.2f}")
+                    st.write(f"Stok: {product[3]} tangkai")
+                    
+    except mysql.connector.Error as err:
+        st.error(f"Error: {err}")
+
+# Fungsi untuk menampilkan metrik dalam card
+def display_metric_card(title, value, icon="📊"):
+    st.markdown(f"""
+        <div class="metric-card">
+            <div style="font-size:2em; margin-bottom:10px;">{icon}</div>
+            <h3>{title}</h3>
+            <h2>{value}</h2>
+        </div>
+    """, unsafe_allow_html=True)
 
 # Login
 def admin_login(username, password):
@@ -24,10 +232,10 @@ def admin_login(username, password):
             result = cursor.fetchone()
             if result:
                 user_info = {
-                    "id": result[0],           # id dari tabel users
-                    "username": result[1],     # username dari tabel users
-                    "password": result[2],     # password dari tabel users
-                    "role": result[3]           # role dari tabel users
+                    "id": result[0],
+                    "username": result[1],
+                    "password": result[2],
+                    "role": result[3]
                 }
                 return user_info
             return None
@@ -47,13 +255,11 @@ def customer_login(username, password):
 # Fungsi untuk mengekstrak custID dari username
 def extract_cust_id_from_username(username):
     cust_id = None
-    # Jika username diawali dengan 'customer', ambil angka setelahnya
     if username.lower().startswith('customer'):
         try:
-            # Ambil angka setelah 'customer'
             cust_id = int(username[8:])
         except ValueError:
-            return None  # Jika username tidak valid (misalnya bukan angka setelah 'customer')
+            return None
     return cust_id
 
 # Fungsi untuk menambah customer
@@ -62,19 +268,15 @@ def add_customer(first_name, last_name, email, phone_number, address, password):
     cursor = conn.cursor()
 
     try:
-        # Insert ke table customer lewat prosedur
         cursor.callproc("AddCustomer", (first_name, last_name, email, phone_number, address))
         conn.commit()
 
-        # Ambil customer_id terakhir
-        cursor.execute("SELECT MAX(custID) as customer_id FROM customers")
+        cursor.execute("SELECT last_userID as customer_id FROM usersequence WHERE id = 1")
         result = cursor.fetchone()
         customer_id = result[0]
 
-        # Buat username customer[id]
         username = f"customer{customer_id}"
 
-        # Insert ke table users
         cursor.execute(
             "INSERT INTO users (username, password, role) VALUES (%s, %s, %s)",
             (username, password, "customer")
@@ -87,17 +289,6 @@ def add_customer(first_name, last_name, email, phone_number, address, password):
     finally:
         conn.close()
 
-# Fungsi untuk mendapatkan nama bunga
-def get_bunga_list():
-    conn = get_connection()
-    try:
-        with conn.cursor(dictionary=True) as cursor:
-            query = "SELECT bungaID, bungaName FROM products"
-            cursor.execute(query)
-            return cursor.fetchall()
-    finally:
-        conn.close()
-
 # Fungsi untuk membuat pesanan baru
 def create_new_order(custID, paymentMethod, bungaID, kuantitasTangkai, custom):
     conn = get_connection()
@@ -105,11 +296,7 @@ def create_new_order(custID, paymentMethod, bungaID, kuantitasTangkai, custom):
         with conn.cursor() as cursor:
             cursor.callproc("CreateNewOrder", (custID, paymentMethod, bungaID, kuantitasTangkai, custom))
             conn.commit()
-
-        # Ambil last_orderID dari tabel ordersequence
-            cursor.execute("SELECT last_orderID FROM ordersequence LIMIT 1;")
-            order_id = cursor.fetchone()[0]
-            st.success(f"Pesanan berhasil dibuat dengan orderID: {order_id}!")
+            st.success("Pesanan berhasil dibuat!")
     except mysql.connector.Error as err:
         st.error(f"Error: {err}")
     finally:
@@ -122,9 +309,10 @@ def update_order_status(orderID, newStatus):
         with conn.cursor() as cursor:
             cursor.callproc("UpdateOrderStatus", (orderID, newStatus))
             conn.commit()
-            st.success(f"Status pesanan {orderID} berhasil diperbarui menjadi '{newStatus}'!")
+            return True
     except mysql.connector.Error as err:
         st.error(f"Error: {err}")
+        return False
     finally:
         conn.close()
 
@@ -135,9 +323,10 @@ def update_stock(bungaID, tambahStock):
         with conn.cursor() as cursor:
             cursor.callproc("UpdateProductStock", (bungaID, tambahStock))
             conn.commit()
-            st.success(f"Stok bunga berhasil ditambahkan sebanyak {tambahStock} tangkai!")
+            return True
     except mysql.connector.Error as err:
         st.error(f"Error: {err}")
+        return False
     finally:
         conn.close()
 
@@ -205,17 +394,14 @@ def get_order_details(search_query="", search_orderID="", bungaID="", kuantitasT
             query = "SELECT * FROM orderdetails WHERE 1=1"
             params = []
 
-            # Filter berdasarkan orderDetailsID
             if search_query:
                 query += " AND orderDetailsID = %s"
-                params.append(search_query)  # Tidak pakai LIKE, karena ID biasanya integer
+                params.append(search_query)
 
-            # Filter berdasarkan orderID
             if search_orderID:
                 query += " AND orderID = %s"
                 params.append(search_orderID)
 
-            #cursor.execute(query, (f"%{search_query}%",))
             if bungaID:
                 query += " AND bungaID = %s"
                 params.append(bungaID)
@@ -259,11 +445,9 @@ def delete_customer(custID):
     conn = get_connection()
     try:
         with conn.cursor() as cursor:
-            # Hapus dari tabel Customers
             cursor.callproc("DeleteCustomer", (custID,))
             conn.commit()
 
-            # Hapus dari tabel Users (username = customer[custID])
             username = f"customer{custID}"
             delete_user_query = "DELETE FROM users WHERE username = %s"
             cursor.execute(delete_user_query, (username,))
@@ -319,9 +503,10 @@ def update_bunga_price(bungaID, new_price):
             query = "UPDATE products SET hargaPerTangkai = %s WHERE bungaID = %s"
             cursor.execute(query, (new_price, bungaID))
             conn.commit()
-            st.success("Harga bunga berhasil diperbarui!")
+            return True
     except mysql.connector.Error as err:
         st.error(f"Error: {err}")
+        return False
     finally:
         conn.close()
 
@@ -346,20 +531,17 @@ def get_customer_info(custID):
     conn = get_connection()
     try:
         with conn.cursor(dictionary=True) as cursor:
-            # Ambil dari tabel customers
             query_cust = "SELECT firstName, lastName, email, phoneNumber, address FROM customers WHERE custID = %s"
             cursor.execute(query_cust, (custID,))
             customer_info = cursor.fetchone()
             
-            # Ambil username dan password dari tabel users
-            username = f"customer{custID}"  # Asumsi username formatnya 'customer{custID}'
+            username = f"customer{custID}"
             query_user = "SELECT username, password FROM users WHERE username = %s"
             cursor.execute(query_user, (username,))
             user_info = cursor.fetchone()
             
-            # Gabungkan kedua info
             if customer_info and user_info:
-                return {**customer_info, **user_info}  # Merge dictionaries
+                return {**customer_info, **user_info}
             else:
                 return None
     finally:
@@ -372,8 +554,8 @@ def verify_old_password(username, old_password):
         with conn.cursor() as cursor:
             query = "SELECT password FROM users WHERE username = %s"
             cursor.execute(query, (username,))
-            result = cursor.fetchone()  # Ambil satu hasil
-            if result and result[0] == old_password:  # result[0] adalah password
+            result = cursor.fetchone()
+            if result and result[0] == old_password:
                 return True
             return False
     finally:
@@ -411,39 +593,14 @@ def get_summary():
     finally:
         conn.close()
 
-# Batalkan Pesanan
-def cancel_order(order_id, customer_id):
+# Fungsi untuk mendapatkan nama bunga
+def get_bunga_list():
     conn = get_connection()
     try:
-        with conn.cursor() as cursor:
-            # Cek apakah order milik customer dan statusnya masih boleh dibatalkan
-            check_query = """
-            SELECT status FROM orders 
-            WHERE orderID = %s AND custID = %s
-            """
-            cursor.execute(check_query, (order_id, customer_id))
-            result = cursor.fetchone()
-
-            if not result:
-                st.error("Order tidak ditemukan atau bukan milik Anda.")
-                return
-
-            current_status = result[0]
-            if current_status in ("Completed", "Shipped", "Cancelled"):
-                st.warning(f"Pesanan tidak bisa dibatalkan karena statusnya sudah '{current_status}'.")
-                return
-
-            # Update status menjadi cancelled
-            update_query = """
-            UPDATE orders 
-            SET status = 'Cancelled'
-            WHERE orderID = %s
-            """
-            cursor.execute(update_query, (order_id,))
-            conn.commit()
-            st.success(f"Pesanan {order_id} berhasil dibatalkan.")
-    except mysql.connector.Error as err:
-        st.error(f"Error: {err}")
+        with conn.cursor(dictionary=True) as cursor:
+            query = "SELECT bungaID, bungaName FROM products"
+            cursor.execute(query)
+            return cursor.fetchall()
     finally:
         conn.close()
 
@@ -494,374 +651,474 @@ def show_order_details(order_id, customer_id):
     finally:
         conn.close()
 
+# Batalkan Pesanan
+def cancel_order(order_id, customer_id):
+    conn = get_connection()
+    try:
+        with conn.cursor() as cursor:
+            # Cek apakah order milik customer dan statusnya masih boleh dibatalkan
+            check_query = """
+            SELECT status FROM orders 
+            WHERE orderID = %s AND custID = %s
+            """
+            cursor.execute(check_query, (order_id, customer_id))
+            result = cursor.fetchone()
+
+            if not result:
+                st.error("Order tidak ditemukan atau bukan milik Anda.")
+                return
+
+            current_status = result[0]
+            if current_status in ("Completed", "Shipped", "Cancelled"):
+                st.warning(f"Pesanan tidak bisa dibatalkan karena statusnya sudah '{current_status}'.")
+                return
+
+            # Update status menjadi cancelled
+            update_query = """
+            UPDATE orders 
+            SET status = 'Cancelled'
+            WHERE orderID = %s
+            """
+            cursor.execute(update_query, (order_id,))
+            conn.commit()
+            st.success(f"Pesanan {order_id} berhasil dibatalkan.")
+    except mysql.connector.Error as err:
+        st.error(f"Error: {err}")
+    finally:
+        conn.close()
+
 # Inisialisasi session_state
 if "role" not in st.session_state:
     st.session_state.role = None
 if "user_info" not in st.session_state:
     st.session_state.user_info = None
+if "username" not in st.session_state:
+    st.session_state.username = None
 
+# Halaman Login/Signup
 if st.session_state.role is None:
-    st.subheader("Selamat Datang di Bouquet Shop!")
+    show_header("Bouquet Shop")
     
-    pilihan_awal = st.radio("Silakan pilih", ("Login", "Sign Up"))
-
+    pilihan_awal = st.radio("Silakan pilih", ("Login", "Sign Up"), horizontal=True)
+    
     if pilihan_awal == "Login":
-        role = st.radio("Login sebagai", ("Admin", "Customer"))
-
+        role = st.radio("Login sebagai", ("Admin", "Customer"), horizontal=True)
+        
         if role == "Admin":
-            username = st.text_input("Username")
-            password = st.text_input("Password", type="password")
-            if st.button("Login Admin"):
-                user = admin_login(username, password)
-                if user:
-                    st.success(f"Selamat datang, Admin!")
-                    st.session_state.role = "admin"
-                    st.session_state.user_info = user
-                    st.rerun()
-                else:
-                    st.error("Username atau password salah!")
+            with st.form(key="admin_login_form"):
+                st.subheader("Login Admin")
+                username = st.text_input("Username")
+                password = st.text_input("Password", type="password")
+                
+                if st.form_submit_button("Login", type="primary"):
+                    user = admin_login(username, password)
+                    if user:
+                        st.success(f"Selamat datang, Admin!")
+                        st.session_state.role = "admin"
+                        st.session_state.user_info = user
+                        st.rerun()
+                    else:
+                        st.error("Username atau password salah!")
 
         elif role == "Customer":
-            username = st.text_input("Username (Format: customerID)")
-            password = st.text_input("Password", type="password")
-            if st.button("Login Customer"):
-                user = customer_login(username, password)
-                if user:
-                    st.success(f"Selamat datang, Customer!") 
-                    st.session_state.role = "customer"
-                    st.session_state.user_info = user
-                    st.session_state.username = username  # Simpan username ke session state
-                    st.rerun()
-                else:
-                    st.error("Username atau password salah!")
+            with st.form(key="customer_login_form"):
+                st.subheader("Login Customer")
+                username = st.text_input("Username (Format: customerID)")
+                password = st.text_input("Password", type="password")
+                
+                if st.form_submit_button("Login", type="primary"):
+                    user = customer_login(username, password)
+                    if user:
+                        st.success(f"Selamat datang, Customer!") 
+                        st.session_state.role = "customer"
+                        st.session_state.user_info = user
+                        st.session_state.username = username
+                        st.rerun()
+                    else:
+                        st.error("Username atau password salah!")
 
     elif pilihan_awal == "Sign Up":
-        st.subheader("Sign Up")
-        first_name = st.text_input("First Name")
-        last_name = st.text_input("Last Name")
-        email = st.text_input("Email")
-        phone_number = st.text_input("Phone Number")
-        address = st.text_area("Address")
-        password = st.text_input("Password", type="password")
-        
-        if st.button("Daftar Customer"):
-            add_customer(first_name, last_name, email, phone_number, address, password)
-
+        with st.form(key="signup_form"):
+            st.subheader("Daftar Akun Customer Baru")
+            col1, col2 = st.columns(2)
+            with col1:
+                first_name = st.text_input("Nama Depan")
+            with col2:
+                last_name = st.text_input("Nama Belakang")
+            email = st.text_input("Email")
+            phone_number = st.text_input("Nomor Telepon")
+            address = st.text_area("Alamat")
+            password = st.text_input("Password", type="password")
+            
+            if st.form_submit_button("Daftar Sekarang", type="primary"):
+                if first_name and last_name and email and phone_number and address and password:
+                    add_customer(first_name, last_name, email, phone_number, address, password)
+                else:
+                    st.error("Semua kolom harus diisi!")
     st.stop()
 
-st.sidebar.title("Navigasi")
+# Sidebar Navigation
+st.sidebar.title("💐 Bouquet Shop")
 
 if st.session_state.role == 'admin':
-    page = st.sidebar.radio("Pilih Menu", [
-        "Dashboard", "Pendapatan Berdasarkan Tanggal", "Data Produk", "Data Customers", "Data Orders", "Data Order Details",
-        "Hapus Customer", "Buat Pesanan", "Riwayat Pesanan Customer", "Lihat Detail Pesanan",
-        "5 Pesanan Terakhir", "Perbarui Status Pesanan", "Laporan Stok Bunga", "Perbarui Stok Bunga",
-        "Update Harga Bunga"
+    st.sidebar.markdown(f"**Halo, Admin!**")
+    page = st.sidebar.radio("Menu", [
+        "Beranda", "Produk", "Pelanggan", "Pesanan", 
+        "Laporan Penjualan"
     ])
 elif st.session_state.user_info['role'] == 'customer':
-    page = st.sidebar.radio("Pilih Menu", [
-        "Data Produk", "Buat Pesanan", "Riwayat Pesanan Customer", "Lihat Detail Pesanan", "Batalkan Pesanan", "Info Akun", "Ganti Password"
+    st.sidebar.markdown(f"**Halo, Customer!**")
+    page = st.sidebar.radio("Menu", [
+        "Beranda", "Produk", "Pesanan", "Informasi Akun"
     ])
-else:
-    page = None
 
-# Dashboard
-if page == "Dashboard":
-    st.title("Dashboard")
-    customers, orders, income = get_summary()
+if st.sidebar.button("🚪 Logout"):
+    st.session_state.role = None
+    st.session_state.user_info = None
+    st.session_state.username = None
+    st.rerun()
 
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Total Pelanggan", customers)
-    col2.metric("Total Pesanan", orders)
-    col3.metric("Total Pendapatan", f"Rp{int(income):,}")
-
-    # Ambil data pendapatan
-    df = get_monthly_revenue()
-
-    # Jika data tidak kosong, buat grafik
-    if not df.empty:
-        fig, ax = plt.subplots()
-        ax.plot(df["Bulan"], df["Pendapatan"], marker="o", linestyle="-", color="b")
+# Halaman Admin
+if st.session_state.role == 'admin':
+    if page == "Beranda":
+        show_header("Beranda")
         
-        ax.set_xlabel("Bulan")
-        ax.set_ylabel("Pendapatan (Rp)")
-        ax.set_title("Tren Pendapatan Bulanan")
-        ax.grid(True)
-        plt.xticks(rotation=45)
-
-        # Tampilkan grafik di Streamlit
-        st.pyplot(fig)
-    else:
-        st.warning("⚠️ Data pendapatan belum tersedia!")
-
-    # Grafik bunga terlaris
-    data_produk_terlaris = get_top_selling_products()
-    if not data_produk_terlaris.empty:
-        fig, ax = plt.subplots()
-        ax.bar(data_produk_terlaris["Nama Bunga"], data_produk_terlaris["Total Terjual"], color='pink')
-        ax.set_xlabel("Nama Bunga")
-        ax.set_ylabel("Jumlah Terjual")
-        ax.set_title("Produk Bunga Terlaris")
-        st.pyplot(fig)
-    else:
-        st.warning("Belum ada data penjualan bunga.")
-
-# Halaman Hapus Customer
-elif page == "Hapus Customer":
-    st.subheader("Hapus Customer")
-    custID = st.number_input("Customer ID yang akan dihapus", min_value=1, step=1)
-    if st.button("Hapus Customer"):
-        delete_customer(custID)
-
-# Halaman Buat Pesanan
-elif page == "Buat Pesanan":
-    st.subheader("Buat Pesanan")
-    if st.session_state.role == "admin":
-        custID = st.number_input("Customer ID", min_value=1, step=1)
-    else:  # Jika customer
-        username = st.session_state.username  # Mengambil username yang sudah disimpan
-        custID = extract_cust_id_from_username(username)  # Mengambil custID dari username
-    
-    paymentMethod = st.selectbox("Metode Pembayaran", ["Cash", "OVO", "Gopay", "Dana"])
-    bunga_list = get_bunga_list()
-    bunga_names = [bunga['bungaName'] for bunga in bunga_list]
-    selected_bunga_name = st.selectbox("Pilih Bunga", bunga_names)
-    # Cari bungaID yang sesuai dengan nama bunga yang dipilih
-    selected_bunga = next((b for b in bunga_list if b['bungaName'] == selected_bunga_name), None)
-    kuantitasTangkai = st.number_input("Jumlah Tangkai", min_value=1, max_value=10, step=1)
-    custom = st.selectbox("Custom", ["Pink", "Brown", "Blue", "Green", "Grey", "Yellow", "White", "Purple"])
-    if st.button("Buat Pesanan"):
-        create_new_order(custID, paymentMethod, selected_bunga['bungaID'], kuantitasTangkai, custom)
-
-# Halaman Riwayat Pesanan Customer
-elif page == "Riwayat Pesanan Customer":
-    if st.session_state.role == "admin":
-        custID = st.number_input("Customer ID", min_value=1, step=1)
-    else:  # Jika customer
-        username = st.session_state.username  # Mengambil username yang sudah disimpan
-        custID = extract_cust_id_from_username(username)  # Mengambil custID dari username
-
-    if custID:
-        df = get_customer_orders(custID)
+        customers, orders, income = get_summary()
+        
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            display_metric_card("Total Pelanggan", customers, "👥")
+        with col2:
+            display_metric_card("Total Pesanan", orders, "📦")
+        with col3:
+            display_metric_card("Total Pendapatan", f"Rp{int(income):,}", "💰")
+        
+        st.subheader("5 Pesanan Terbaru")
+        df = get_last_five_orders()
         if not df.empty:
             st.dataframe(df)
         else:
-            st.warning("Customer ini belum pernah memesan.")
-
-# Halaman 5 Pesanan Terakhir
-elif page == "5 Pesanan Terakhir":
-    st.subheader("5 Pesanan Terbaru")
-    df = get_last_five_orders()
-    if not df.empty:
-        st.dataframe(df)
-    else:
-        st.warning("Belum ada pesanan.")
-
-# Halaman Perbarui Status Pesanan
-elif page == "Perbarui Status Pesanan":
-    st.subheader("Perbarui Status Pesanan")
-    orderID = st.number_input("Order ID", min_value=1, step=1)
-    newStatus = st.selectbox("Pilih Status Baru", ["Processed", "Shipped", "Completed", "Cancelled"])
-    if st.button("Perbarui Status"):
-        update_order_status(orderID, newStatus)
-
-# Halaman Laporan Stok Bunga
-elif page == "Laporan Stok Bunga":
-    st.subheader("Laporan Bunga dengan Stok Rendah")
-    threshold = st.number_input("Batas Stok Minimum", min_value=1, value=5)
-    df = get_low_stock_products(threshold)
-    if not df.empty:
-        st.dataframe(df)
-    else:
-        st.success("Semua stok bunga aman!")
-
-# Halaman Perbarui Stok Bunga
-elif page == "Perbarui Stok Bunga":
-    st.subheader("Perbarui Stok Bunga")
-
-    bunga_list = get_bunga_list()
-    bunga_names = [bunga['bungaName'] for bunga in bunga_list]
-    
-    selected_bunga_name = st.selectbox("Pilih Bunga", bunga_names)
-
-    # Cari bungaID yang sesuai dengan nama bunga yang dipilih
-    selected_bunga = next((b for b in bunga_list if b['bungaName'] == selected_bunga_name), None)
-
-    if selected_bunga:
-        tambahStock = st.number_input("Jumlah Stok yang Ditambahkan", min_value=1, step=1)
-        if st.button("Tambah Stok"):
-            update_stock(selected_bunga['bungaID'], tambahStock)
-
-
-# Halaman Update Harga Bunga
-elif page == "Update Harga Bunga":
-    st.subheader("Update Harga Bunga")
-
-    bunga_list = get_bunga_list()
-    bunga_names = [bunga['bungaName'] for bunga in bunga_list]
-    
-    selected_bunga_name = st.selectbox("Pilih Bunga", bunga_names)
-
-    # Cari bungaID yang sesuai dengan nama bunga yang dipilih
-    selected_bunga = next((b for b in bunga_list if b['bungaName'] == selected_bunga_name), None)
-    
-    new_price = st.number_input("Harga Baru", min_value=0)
-    if st.button("Update Harga"):
-        update_bunga_price(selected_bunga['bungaID'], new_price)
-
-# Halaman Pendapatan Berdasarkan Tanggal
-elif page == "Pendapatan Berdasarkan Tanggal":
-    st.subheader("Pendapatan Berdasarkan Rentang Tanggal")
-    start_date = st.date_input("Tanggal Mulai")
-    end_date = st.date_input("Tanggal Selesai")
-    if st.button("Hitung Pendapatan"):
-        total_income = get_income_between_dates(start_date, end_date)
-        st.success(f"Total Pendapatan: Rp{total_income:,}")
-
-# Halaman Data Customers
-elif page == "Data Customers":
-    st.subheader("📋 Data Customers")
-    search_query = st.text_input("Cari Customer (Nama/Email)", "")
-    customer_id = st.text_input("Cari berdasarkan Customer ID", "")
-    data_customers = get_customers(search_query, customer_id)
-    st.dataframe(data_customers)
-
-# Halaman Data Orders
-elif page == "Data Orders":
-    st.subheader("📋 Data Orders")
-    search_query = st.text_input("Cari Order ID", "")
-    status_filter = st.selectbox("Filter Status", ["", "Processed", "Shipped", "Completed"])
-    order_date_filter = st.date_input("Filter Order Date", value=None)
-    payment_method_filter = st.selectbox("Filter Metode Pembayaran", ["", "Dana", "OVO", "Gopay", "Cash"])
-    data_orders = get_orders(search_query, status_filter, order_date_filter, payment_method_filter)
-    st.dataframe(data_orders)
-
-# Halaman Data Order Details
-elif page == "Data Order Details":
-    st.subheader("📋 Data Order Details")
-    search_query = st.text_input("Cari Order Details ID", "")
-    search_orderID = st.text_input("Cari Order ID", "")
-    bunga_id_filter = st.selectbox("Filter Bunga ID", [""] + [str(i) for i in range(1, 6)])
-    kuantitas_filter = st.selectbox("Filter Kuantitas Tangkai", [""] + [str(i) for i in range(1, 11)])
-    custom_filter = st.selectbox("Filter Custom", ["", "Green", "Brown", "Blue", "Purple", "Yellow", "Grey", "White", "Pink"])
-    data_order_details = get_order_details(search_query, search_orderID, bunga_id_filter, kuantitas_filter, custom_filter)
-    st.dataframe(data_order_details)
-
-elif page == "Data Produk":
-    st.subheader("Daftar Produk")
-
-    try:
-        conn = get_connection()  # Panggil fungsi untuk mendapatkan koneksi
-        with conn.cursor() as cursor:
-            cursor.execute("SELECT * FROM products")  # Ambil data dari MySQL
-            product_list = cursor.fetchall()
-
-            for product in product_list:
-                st.write(f"🛒 **{product[1]}** - Rp {product[2]:,.2f} ({product[3]} stok)")
-
-    except mysql.connector.Error as err:
-        st.error(f"Error: {err}")
-
-    finally:
-        if conn:
-            conn.close()  # Pastikan koneksi ditutup setelah digunakan
-
-# Halaman Info Akun
-elif page == "Info Akun":
-    st.subheader("Informasi Akun Anda")
-
-    # Pastikan user sudah login
-    if st.session_state.role == "customer":
-        # Dapatkan custID dari username
-        username = st.session_state.username
-        custID = None
-        if username.lower().startswith('customer'):
-            try:
-                custID = int(username[8:])
-            except ValueError:
-                st.error("Username tidak valid.")
+            st.warning("Belum ada pesanan.")
         
-        if custID:
-            info = get_customer_info(custID)
-            if info:
-                st.text_input("First Name", value=info['firstName'], disabled=True)
-                st.text_input("Last Name", value=info['lastName'], disabled=True)
-                st.text_input("Email", value=info['email'], disabled=True)
-                st.text_input("Phone Number", value=info['phoneNumber'], disabled=True)
-                st.text_area("Address", value=info['address'], disabled=True)
-                st.text_input("Username", value=info['username'], disabled=True)
-                st.text_input("Password", value=info['password'], disabled=True)  # Untuk demo, biasanya password tidak ditampilkan
-            else:
-                st.error("Gagal mengambil data akun.")
+        st.subheader("Produk dengan Stok Rendah")
+        threshold = st.number_input("Batas Stok Minimum", min_value=1, value=5)
+        df = get_low_stock_products(threshold)
+        if not df.empty:
+            st.dataframe(df)
         else:
-            st.error("Gagal membaca Customer ID.")
-    else:
-        st.warning("Hanya customer yang bisa melihat halaman ini.")
-
-# Halaman Lihat Detail Pesanan
-elif page == "Lihat Detail Pesanan":
-    st.title("Lihat Detail Pesanan")
-
-    if st.session_state.role == "admin":
-        cust_id = st.number_input("Customer ID", min_value=1, step=1)
-    else:  # Jika customer
-        username = st.session_state.username  # Mengambil username yang sudah disimpan
-        cust_id = extract_cust_id_from_username(username)  # Mengambil custID dari username
+            st.success("Semua stok produk aman!")
     
-    order_id = st.text_input("Masukkan Order ID:")
+    elif page == "Produk":
+        show_header("Manajemen Produk")
+        
+        tab1, tab2, tab3 = st.tabs(["Daftar Produk", "Update Stok", "Update Harga"])
+        
+        with tab1:
+            st.subheader("Daftar Produk")
+            try:
+                conn = get_connection()
+                with conn.cursor() as cursor:
+                    cursor.execute("SELECT * FROM products")
+                    product_list = cursor.fetchall()
+                    
+                    for product in product_list:
+                        display_product_card(product)
+            except mysql.connector.Error as err:
+                st.error(f"Error: {err}")
+            finally:
+                if conn:
+                    conn.close()
+        
+        with tab2:
+            st.subheader("Perbarui Stok Bunga")
+            bunga_list = get_bunga_list()
+            bunga_names = [bunga['bungaName'] for bunga in bunga_list]
+            selected_bunga_name = st.selectbox("Pilih Bunga", bunga_names, key="stok_select")
+            selected_bunga = next((b for b in bunga_list if b['bungaName'] == selected_bunga_name), None)
+            tambahStock = st.number_input("Jumlah Stock yang Ditambahkan", min_value=1, step=1, key="stok_input")
+            if st.button("Tambah Stock", type="primary", key="tambah_stok_btn"):
+                if selected_bunga and tambahStock > 0:
+                    success = update_stock(selected_bunga['bungaID'], tambahStock)
+                    if success:
+                        st.session_state.stok_diperbarui = True
+                        st.session_state.bunga_terakhir = selected_bunga_name
+                        st.session_state.jumlah_tambah = tambahStock
+                        st.rerun()
+            if st.session_state.get("stok_diperbarui"):
+                st.success(f"Stok bunga {st.session_state.bunga_terakhir} berhasil ditambahkan sebanyak {st.session_state.jumlah_tambah} tangkai!")
+                st.session_state.stok_diperbarui = False
 
-    if st.button("Lihat Detail"):
-        if not order_id:
-            st.warning("Mohon masukkan Order ID terlebih dahulu.")
-        else:
-            show_order_details(order_id, cust_id)
+        with tab3:
+            st.subheader("Update Harga Bunga")
+            bunga_list = get_bunga_list()
+            bunga_names = [bunga['bungaName'] for bunga in bunga_list]
+            selected_bunga_name = st.selectbox("Pilih Bunga", bunga_names, key="update_harga_select")
+            selected_bunga = next((b for b in bunga_list if b['bungaName'] == selected_bunga_name), None)
+            new_price = st.number_input("Harga Baru", min_value=0, key="update_harga_input")
+            if st.button("Update Harga", type="primary", key="update_harga_btn"):
+                success = update_bunga_price(selected_bunga['bungaID'], new_price)
+                if success:
+                    st.session_state.harga_diperbarui = True
+                    st.rerun()
+            if st.session_state.get("harga_diperbarui"):
+                st.success(f"Harga bunga {st.session_state.bunga_terakhir} berhasil diperbarui!")
+                st.session_state.harga_diperbarui = False
 
-# Halaman Batalkan Pesanan
-elif page == "Batalkan Pesanan":
-    st.title("Batalkan Pesanan")
+    elif page == "Pelanggan":
+        show_header("Manajemen Pelanggan")
+        
+        tab1, tab2 = st.tabs(["Daftar Pelanggan", "Hapus Pelanggan"])
+        
+        with tab1:
+            st.subheader("Daftar Pelanggan")
+            search_query = st.text_input("Cari Pelanggan (Nama/Email)", "")
+            customer_id = st.text_input("Cari berdasarkan ID Pelanggan", "")
+            data_customers = get_customers(search_query, customer_id)
+            st.dataframe(data_customers)
+        
+        with tab2:
+            st.subheader("Hapus Pelanggan")
+            custID = st.number_input("ID Pelanggan yang akan dihapus", min_value=1, step=1)
+            if st.button("Hapus Pelanggan", type="primary"):
+                delete_customer(custID)
+    
+    elif page == "Pesanan":
+        show_header("Manajemen Pesanan")
+        
+        tab1, tab2, tab3 = st.tabs(["Pesanan Pelanggan", "Daftar Pesanan", "Daftar Detail Pesanan"])
+        
+        with tab1:
+            subtab1, subtab2, subtab3, subtab4 = st.tabs(["Buat Pesanan", "Riwayat Pesanan", "Informasi Pesanan", "Update Status"])
 
-    username = st.session_state.username  # Mengambil username yang sudah disimpan
-    cust_id = extract_cust_id_from_username(username)  # Mengambil custID dari username
-    order_id = st.text_input("Masukkan Order ID yang ingin dibatalkan:")
+            with subtab1:
+                st.subheader("Buat Pesanan Baru")
+                custID = st.number_input("Customer ID", min_value=1, step=1, key="customer_new_order")
+                paymentMethod = st.selectbox("Metode Pembayaran", ["Cash", "OVO", "Gopay", "Dana"])
+                bunga_list = get_bunga_list()
+                bunga_names = [bunga['bungaName'] for bunga in bunga_list]
+                selected_bunga_name = st.selectbox("Pilih Bunga", bunga_names)
+                selected_bunga = next((b for b in bunga_list if b['bungaName'] == selected_bunga_name), None)
+                kuantitasTangkai = st.number_input("Jumlah Tangkai", min_value=1, max_value=10, step=1)
+                custom = st.selectbox("Warna Custom", ["Pink", "Brown", "Blue", "Green", "Grey", "Yellow", "White", "Purple"])
+                if st.button("Buat Pesanan", type="primary", key="new_order_btn"):
+                    create_new_order(custID, paymentMethod, selected_bunga['bungaID'], kuantitasTangkai, custom)
 
-    if st.button("Batalkan Pesanan"):
-        if not order_id:
-            st.warning("Mohon masukkan Order ID terlebih dahulu.")
-        else:
-            cancel_order(order_id, cust_id)
-
-# Halaman Ganti Password
-elif page == "Ganti Password":
-    st.subheader("Ganti Password")
-
-    if st.session_state.role == "customer":
-        username = st.session_state.username
-        # Input password lama dan password baru
-        old_password = st.text_input("Password Lama", type="password")
-        new_password = st.text_input("Password Baru", type="password")
-        confirm_password = st.text_input("Konfirmasi Password Baru", type="password")
-
-        if st.button("Ganti Password"):
-            if old_password and new_password and confirm_password:
-                if new_password != confirm_password:
-                    st.error("Password baru dan konfirmasi password tidak cocok!")
-                else:
-                    # Verifikasi password lama
-                    if verify_old_password(username, old_password):
-                        # Update password baru
-                        if update_password(username, new_password):
-                            st.success("Password berhasil diganti!")
-                        else:
-                            st.error("Terjadi kesalahan saat mengupdate password.")
+            with subtab2:
+                st.subheader("Riwayat Pesanan Pelanggan")
+                custID = st.number_input("Masukkan Customer ID", min_value=1, step=1, key="customer_orders_history")
+                if custID:
+                    df = get_customer_orders(custID)
+                    if not df.empty:
+                        st.dataframe(df)
                     else:
-                        st.error("Password lama salah!")
+                        st.warning("Pelanggan ini belum pernah memesan.")
+            
+            with subtab3:
+                st.subheader("Informasi Pesanan Pelanggan")
+                cust_id = st.number_input("Customer ID", min_value=1, step=1, key="customer_order_details")
+                order_id = st.text_input("Masukkan Order ID:", key="customer_details_order_id")
+                if st.button("Lihat Detail", type="primary", key="customer_order_details_btn"):
+                    if not order_id:
+                        st.warning("Mohon masukkan Order ID terlebih dahulu.")
+                    else:
+                        show_order_details(order_id, cust_id)
+
+            with subtab4:
+                st.subheader("Perbarui Status Pesanan Pelanggan")
+                orderID = st.number_input("Order ID", min_value=1, step=1, key="update_status_order_id")
+                newStatus = st.selectbox("Status Baru", ["Processed", "Shipped", "Completed", "Cancelled"], key="update_status_new_status")                
+                if st.button("Perbarui Status", type="primary", key="update_status_btn"):
+                    success = update_order_status(orderID, newStatus)
+                    if success:
+                        st.session_state.status_diperbarui = True
+                        st.rerun()
+                if st.session_state.get("status_diperbarui"):
+                    st.success(f"Status pesanan {orderID} berhasil diperbarui menjadi '{newStatus}'!")
+                    st.session_state.status_diperbarui = False
+
+        with tab2:
+            st.subheader("Daftar Pesanan")
+            search_query = st.text_input("Cari Order ID", "", key="order_search_query")
+            status_filter = st.selectbox("Filter Status", ["", "Processed", "Shipped", "Completed", "Cancelled"], key="order_status_filter")
+            order_date_filter = st.date_input("Filter Tanggal Pesanan", value=None, key="order_date_filter")
+            payment_method_filter = st.selectbox("Filter Metode Pembayaran", ["", "Dana", "OVO", "Gopay", "Cash"], key="order_payment_filter")
+            data_orders = get_orders(search_query, status_filter, order_date_filter, payment_method_filter)
+            st.dataframe(data_orders, use_container_width=True)
+
+        with tab3:
+            st.subheader("Daftar Detail Pesanan")
+            search_query = st.text_input("Cari Order Details ID", "", key="details_search_query")
+            search_orderID = st.text_input("Cari Order ID", "", key="details_search_order_id")
+            bunga_id_filter = st.selectbox("Filter Bunga ID", [""] + [str(i) for i in range(1, 6)], key="details_bunga_id_filter")
+            kuantitas_filter = st.selectbox("Filter Jumlah Tangkai", [""] + [str(i) for i in range(1, 11)], key="details_kuantitas_filter")
+            custom_filter = st.selectbox(
+                "Filter Warna Custom",
+                ["", "Green", "Brown", "Blue", "Purple", "Yellow", "Grey", "White", "Pink"],
+                key="details_custom_filter"
+            )
+            data_order_details = get_order_details(search_query, search_orderID, bunga_id_filter, kuantitas_filter, custom_filter)
+            st.dataframe(data_order_details, use_container_width=True)
+
+    elif page == "Laporan Penjualan":
+        show_header("Laporan Penjualan")
+        
+        tab1, tab2 = st.tabs(["Produk Terlaris", "Pendapatan"])
+        
+        with tab1:
+            st.subheader("Produk Bunga Terlaris")
+            data_produk_terlaris = get_top_selling_products()
+            if not data_produk_terlaris.empty:
+                fig, ax = plt.subplots()
+                ax.bar(data_produk_terlaris["Nama Bunga"], data_produk_terlaris["Total Terjual"], color='#ff6b6b')
+                ax.set_xlabel("Nama Bunga")
+                ax.set_ylabel("Jumlah Terjual")
+                ax.set_title("Produk Bunga Terlaris")
+                plt.xticks(rotation=45)
+                st.pyplot(fig)
             else:
-                st.error("Semua kolom harus diisi.")
-    else:
-        st.warning("Hanya customer yang dapat mengganti password.")
+                st.warning("Belum ada data penjualan bunga.")
+        
+        with tab2:
+            st.subheader("Pendapatan")
+            
+            st.subheader("Pendapatan Berdasarkan Rentang Tanggal")
+            col1, col2 = st.columns(2)
+            with col1:
+                start_date = st.date_input("Tanggal Mulai")
+            with col2:
+                end_date = st.date_input("Tanggal Selesai")
+            if st.button("Hitung Pendapatan", type="primary"):
+                total_income = get_income_between_dates(start_date, end_date)
+                st.success(f"Total Pendapatan: Rp{total_income:,}")
+            
+            st.subheader("Grafik Pendapatan Bulanan")
+            df = get_monthly_revenue()
+            if not df.empty:
+                fig, ax = plt.subplots()
+                ax.plot(df["Bulan"], df["Pendapatan"], marker="o", linestyle="-", color="#ff6b6b")
+                ax.set_xlabel("Bulan")
+                ax.set_ylabel("Pendapatan (Rp)")
+                ax.set_title("Tren Pendapatan Bulanan")
+                ax.grid(True)
+                plt.xticks(rotation=45)
+                st.pyplot(fig)
+            else:
+                st.warning("Belum ada data pendapatan.")
 
-if st.sidebar.button("Logout"):
-    st.session_state.role = None
-    st.session_state.user_info = None
-    st.rerun()
+# Halaman Customer
+elif st.session_state.user_info['role'] == 'customer':
+    if page == "Beranda":
+        show_header("Beranda")
+        st.subheader("Produk Terpopuler")
+        display_products_grid()
+    
+    elif page == "Produk":
+        show_header("Katalog Produk")
+        
+        try:
+            conn = get_connection()
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT * FROM products")
+                product_list = cursor.fetchall()
+                
+                for product in product_list:
+                    display_product_card(product)
+        except mysql.connector.Error as err:
+            st.error(f"Error: {err}")
+        finally:
+            if conn:
+                conn.close()
+    
+    elif page == "Pesanan":
+        show_header("Pesanan")
+        
+        tab1, tab2, tab3 = st.tabs(["Riwayat Pesanan", "Informasi Pesanan", "Batalkan Pesanan"])
 
+        username = st.session_state.username
+        cust_id = extract_cust_id_from_username(username)
+        
+        if cust_id:
+            with tab1:
+                st.subheader("Riwayat Pesanan")
+                df = get_customer_orders(cust_id)
+                if not df.empty:
+                    st.dataframe(df)
+                else:
+                    st.warning("Anda belum pernah memesan.")
+            
+            with tab2:
+                st.subheader("Informasi Pesanan")
+                order_id = st.text_input("Masukkan Order ID:", key="customer_details_order_id")
+                if st.button("Lihat Detail", type="primary", key="customer_order_details_btn"):
+                    if not order_id:
+                        st.warning("Mohon masukkan Order ID terlebih dahulu.")
+                    else:
+                        show_order_details(order_id, cust_id)
+
+            with tab3:
+                st.subheader("Batalkan Pesanan")
+                order_id = st.text_input("Masukkan Order ID yang ingin dibatalkan:", key="cancel_order_input")
+                if st.button("Batalkan Pesanan", type="primary", key="cancel_order_btn"):
+                    if not order_id:
+                        st.warning("Mohon masukkan Order ID terlebih dahulu.")
+                    else:
+                        cancel_order(order_id, cust_id)
+                        st.session_state.order_dibatalkan = True
+                        st.session_state.last_cancelled_order = order_id
+                        st.rerun()
+                # Tampilkan status setelah rerun
+                if st.session_state.get("order_dibatalkan"):
+                    st.success(f"Pesanan {st.session_state.last_cancelled_order} berhasil dibatalkan!")
+                    st.session_state.order_dibatalkan = False
+
+    elif page == "Informasi Akun":
+        show_header("Informasi Akun")
+        
+        tab1, tab2 = st.tabs(["Info Akun", "Ganti Password"])
+        
+        with tab1:
+            st.subheader("Informasi Akun")
+            
+            username = st.session_state.username
+            custID = extract_cust_id_from_username(username)
+            
+            if custID:
+                info = get_customer_info(custID)
+                if info:
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.text_input("Nama Depan", value=info['firstName'], disabled=True)
+                        st.text_input("Email", value=info['email'], disabled=True)
+                        st.text_input("Username", value=info['username'], disabled=True)
+                    with col2:
+                        st.text_input("Nama Belakang", value=info['lastName'], disabled=True)
+                        st.text_input("Nomor Telepon", value=info['phoneNumber'], disabled=True)
+                    st.text_area("Alamat", value=info['address'], disabled=True)
+                else:
+                    st.error("Gagal mengambil data akun.")
+            else:
+                st.error("Gagal membaca Customer ID.")
+        
+        with tab2:
+            st.subheader("Ganti Password")
+            
+            username = st.session_state.username
+            with st.form(key="change_password_form"):
+                old_password = st.text_input("Password Lama", type="password")
+                new_password = st.text_input("Password Baru", type="password")
+                confirm_password = st.text_input("Konfirmasi Password Baru", type="password")
+                
+                if st.form_submit_button("Ganti Password", type="primary"):
+                    if old_password and new_password and confirm_password:
+                        if new_password != confirm_password:
+                            st.error("Password baru dan konfirmasi password tidak cocok!")
+                        else:
+                            if verify_old_password(username, old_password):
+                                if update_password(username, new_password):
+                                    st.success("Password berhasil diganti!")
+                                else:
+                                    st.error("Terjadi kesalahan saat mengupdate password.")
+                            else:
+                                st.error("Password lama salah!")
+                    else:
+                        st.error("Semua kolom harus diisi!")
