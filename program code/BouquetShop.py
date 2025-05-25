@@ -145,7 +145,7 @@ def get_connection():
         host="localhost",
         user="root",
         password="",
-        database="bouquetshop"
+        database="bshop"
     )
 
 # Header

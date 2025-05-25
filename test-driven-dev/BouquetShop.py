@@ -142,13 +142,18 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Fungsi untuk mendapatkan koneksi database
+
+import psycopg2
+import os  # Untuk membaca environment variables (jika digunakan)
+
 def get_connection():
-    return mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="",
-        database="bshop"
+    return psycopg2.connect(
+        host="kfagkljzyfdegjomntoy.supabase.co",  # Dari NEXT_PUBLIC_SUPABASE_URL (tanpa https://)
+        port=5432,
+        database="postgres",  # Ganti jika berbeda
+        user="imincloudnine",      # Ganti dengan user yang benar
+        password="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtmYWdrbGp6eWZkZWdqb21udG95Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgwMDkwMDIsImV4cCI6MjA2MzU4NTAwMn0.Pd4MPHRuOy0M9lOIUxw3EHP27SdPmVYVa_niz77xLJE"  # Ganti dengan password yang benar
+        # Atau, lebih baik: password=os.environ.get("SUPABASE_DB_PASSWORD")
     )
 
 # Header
