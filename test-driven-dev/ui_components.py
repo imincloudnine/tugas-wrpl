@@ -52,19 +52,19 @@ APP_STYLES = """
         background-color: #ff5252;
     }
     input[type="text"], input[type="number"] {
-        color: white !important;
+        color: #FF1493 !important;
         border: 1px solid #ddd !important;
         border-radius: 8px !important;
         padding: 6.25px !important;
         border-top: 1px solid #ddd !important;
     }
     .stSelectbox > div > div {
-        color: white !important;
+        color: #FF1493 !important;
         border: 1px solid #ddd !important;
         border-radius: 6px !important;
     }
     .stSelectbox div[data-baseweb="select"] {
-        color: white !important;
+        color: #FF1493 !important;
         border-radius: 6px !important;
     }
     input[type="text"]:focus, input[type="number"]:focus {
@@ -81,7 +81,7 @@ APP_STYLES = """
         border-radius: 6px !important;
     }
     textarea {
-        color: white !important;
+        color: #FF1493 !important;
         border: 1px solid #ddd !important;
         border-radius: 8px !important;
         padding: 6.25px !important;
@@ -92,7 +92,7 @@ APP_STYLES = """
         outline: none !important;
     }
     input[type="password"] {
-        color: white !important;
+        color: #FF1493 !important;
         border: 1px solid #ddd !important;
         border-radius: 8px !important;
         padding: 6.25px !important;
