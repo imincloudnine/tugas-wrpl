@@ -44,7 +44,7 @@ if st.session_state.temp_message:
 
 # --- Halaman Login/Signup (Jika belum login) ---
 if st.session_state.role is None:
-    ui_components.show_header("Bouquet Shop") # Panggil header dari ui_components
+    ui_components.show_header("💐 Bouquet Shop") # Panggil header dari ui_components
     
     pilihan_awal = st.radio("Silakan pilih:", ("Login", "Sign Up"), horizontal=True, key="login_signup_radio")
     
@@ -71,7 +71,7 @@ if st.session_state.role is None:
         elif role_pilihan == "Customer":
             with st.form(key="customer_login_form"):
                 st.subheader("Login Customer")
-                username_input = st.text_input("Username (Format: customerID atau username unik)")
+                username_input = st.text_input("Username (Format: customerID)")
                 password_input = st.text_input("Password", type="password")
                 
                 if st.form_submit_button("Login"):
@@ -80,7 +80,7 @@ if st.session_state.role is None:
                         st.session_state.role = "customer"
                         st.session_state.user_info = user_data
                         st.session_state.username = user_data['username'] # Simpan username dari hasil login
-                        st.session_state.temp_message = {"type": "success", "text": f"Selamat datang, {user_data['username']}!"}
+                        st.session_state.temp_message = {"type": "success", "text": f"Selamat datang, Customer!"}
                         st.rerun()
                     else:
                         st.error("Username atau password customer salah!")
@@ -112,22 +112,21 @@ if st.session_state.role is None:
     st.stop() # Hentikan eksekusi jika belum login
 
 # --- Sidebar Navigasi (Setelah Login) ---
-st.sidebar.title("註 Bouquet Shop") # Icon Bunga
+st.sidebar.title("💐 Bouquet Shop") # Icon Bunga
 user_display_name = st.session_state.user_info.get('username', 'Pengguna') if st.session_state.user_info else 'Pengguna'
 
-
 if st.session_state.role == 'admin':
-    st.sidebar.markdown(f"**Halo, Admin {user_display_name}!**")
+    st.sidebar.markdown(f"**Halo, Admin!**")
     page = st.sidebar.radio("Menu Admin", [
         "Beranda", "Produk", "Pelanggan", "Pesanan", "Laporan Penjualan"
     ], key="admin_menu")
 elif st.session_state.role == 'customer': # Perbaiki kondisi untuk customer
-    st.sidebar.markdown(f"**Halo, {user_display_name}!**") # Lebih personal untuk customer
+    st.sidebar.markdown(f"**Halo, Customer!**") # Lebih personal untuk customer
     page = st.sidebar.radio("Menu Customer", [
-        "Beranda", "Produk", "Pesanan Saya", "Informasi Akun"
+        "Produk", "Pesanan Saya", "Informasi Akun"
     ], key="customer_menu")
 
-if st.sidebar.button("坎 Logout"): # Icon Logout
+if st.sidebar.button("🚪 Logout"): # Icon Logout
     # Reset semua session state yang relevan
     st.session_state.role = None
     st.session_state.user_info = None
@@ -146,11 +145,11 @@ if st.session_state.role == 'admin':
         
         col1, col2, col3 = st.columns(3)
         with col1:
-            ui_components.display_metric_card("Total Pelanggan", total_cust, "則") # Icon Pelanggan
+            ui_components.display_metric_card("Total Pelanggan", total_cust, "👥") # Icon Pelanggan
         with col2:
-            ui_components.display_metric_card("Total Pesanan", total_ord, "逃") # Icon Pesanan
+            ui_components.display_metric_card("Total Pesanan", total_ord, "📦") # Icon Pesanan
         with col3:
-            ui_components.display_metric_card("Total Pendapatan", f"Rp{int(total_inc):,}", "腸") # Icon Pendapatan
+            ui_components.display_metric_card("Total Pendapatan", f"Rp{int(total_inc):,}", "💰") # Icon Pendapatan
         
         st.subheader("5 Pesanan Terbaru")
         df_last_orders = om.get_last_five_orders()
@@ -249,20 +248,69 @@ if st.session_state.role == 'admin':
         # ... (Mirip dengan kode asli Anda, tapi panggil fungsi dari om.* dan cm.*) ...
         # Contoh:
         tab_pesanan_admin1, tab_pesanan_admin2, tab_pesanan_admin3 = st.tabs([
-            "Daftar Semua Pesanan", "Detail Pesanan", "Update Status"
+            "Pesanan Pelanggan", "Daftar Semua Pesanan", "Detail Pesanan"
         ])
 
         with tab_pesanan_admin1:
+            subtab1, subtab2, subtab3, subtab4 = st.tabs(["Buat Pesanan", "Riwayat Pesanan", "Informasi Pesanan", "Update Status"])
+
+            with subtab1:
+                st.subheader("Buat Pesanan Baru")
+                custID = st.number_input("Customer ID", min_value=1, step=1, key="customer_new_order")
+                paymentMethod = st.selectbox("Metode Pembayaran", ["Cash", "OVO", "Gopay", "Dana"])
+                bunga_list = pm.get_bunga_list()
+                bunga_names = {b['bungaName']: b['bungaID'] for b in pm.get_bunga_list()}
+                selected_bunga_name = st.selectbox("Pilih Bunga", bunga_names)
+                selected_bunga = next((b for b in bunga_list if b['bungaName'] == selected_bunga_name), None)
+                kuantitasTangkai = st.number_input("Jumlah Tangkai", min_value=1, max_value=10, step=1)
+                custom = st.selectbox("Warna Custom", ["Pink", "Brown", "Blue", "Green", "Grey", "Yellow", "White", "Purple"])
+                if st.button("Buat Pesanan", type="primary", key="new_order_btn"):
+                    create_new_order(custID, paymentMethod, selected_bunga['bungaID'], kuantitasTangkai, custom)
+
+            with subtab2:
+                st.subheader("Riwayat Pesanan Pelanggan")
+                custID = st.number_input("Masukkan Customer ID", min_value=1, step=1, key="customer_orders_history")
+                if custID:
+                    df_cust_orders = om.get_customer_orders_history(custID)
+                    if not df_cust_orders.empty:
+                        st.dataframe(df_cust_orders, use_container_width=True)
+                    else:
+                        st.warning("Pelanggan ini belum pernah memesan.")
+
+            with subtab3:
+                st.subheader("Informasi Pesanan Pelanggan")
+                cust_id = st.number_input("Customer ID", min_value=1, step=1, key="customer_order_details")
+                order_id = st.text_input("Masukkan Order ID:", key="customer_details_order_id")
+                if st.button("Lihat Detail", type="primary", key="customer_order_details_btn"):
+                    if not order_id:
+                        st.warning("Mohon masukkan Order ID terlebih dahulu.")
+                    else:
+                        show_order_details(order_id, cust_id)
+
+            with subtab4:
+                st.subheader("Perbarui Status Pesanan")
+                order_id_update = st.number_input("Order ID untuk Update Status", min_value=1, step=1, key="admin_order_id_update")
+                new_status = st.selectbox("Status Baru", ["Processed", "Shipped", "Completed", "Cancelled"], key="admin_new_status_select")
+                if st.button("Update Status", key="admin_update_status_btn"):
+                    if order_id_update and new_status:
+                        success = om.update_order_status(order_id_update, new_status)
+                        if success:
+                            st.session_state.temp_message = {"type": "success", "text": f"Status pesanan {order_id_update} berhasil diupdate menjadi {new_status}."}
+                        else:
+                            st.session_state.temp_message = {"type": "error", "text": f"Gagal mengupdate status pesanan {order_id_update}."}
+                        st.rerun()
+
+        with tab_pesanan_admin2:
             st.subheader("Daftar Semua Pesanan")
             search_order_id = st.text_input("Cari Order ID", "", key="admin_search_order_id")
-            status_filter = st.selectbox("Filter Status", ["", "Pending", "Processed", "Shipped", "Completed", "Cancelled"], key="admin_status_filter")
+            status_filter = st.selectbox("Filter Status", ["", "Processed", "Shipped", "Completed", "Cancelled"], key="admin_status_filter")
             order_date_filter = st.date_input("Filter Tanggal Pesanan", value=None, key="admin_date_filter")
             payment_method_filter = st.selectbox("Filter Metode Pembayaran", ["", "Cash", "OVO", "Gopay", "Dana"], key="admin_payment_filter")
             
             df_orders = om.get_orders(search_order_id, status_filter, order_date_filter, payment_method_filter)
             st.dataframe(df_orders, use_container_width=True)
 
-        with tab_pesanan_admin2:
+        with tab_pesanan_admin3:
             st.subheader("Lihat Detail Pesanan")
             admin_order_id_detail = st.text_input("Masukkan Order ID untuk Detail", key="admin_order_id_detail_input")
             admin_cust_id_detail = st.number_input("Masukkan Customer ID Pemilik Pesanan", min_value=1, step=1, key="admin_cust_id_detail_input")
@@ -275,19 +323,7 @@ if st.session_state.role == 'admin':
                         st.warning("Detail pesanan tidak ditemukan atau ID tidak cocok.")
                 else:
                     st.warning("Mohon masukkan Order ID dan Customer ID.")
-        
-        with tab_pesanan_admin3:
-            st.subheader("Perbarui Status Pesanan")
-            order_id_update = st.number_input("Order ID untuk Update Status", min_value=1, step=1, key="admin_order_id_update")
-            new_status = st.selectbox("Status Baru", ["Pending", "Processed", "Shipped", "Completed", "Cancelled"], key="admin_new_status_select")
-            if st.button("Update Status", key="admin_update_status_btn"):
-                if order_id_update and new_status:
-                    success = om.update_order_status(order_id_update, new_status)
-                    if success:
-                        st.session_state.temp_message = {"type": "success", "text": f"Status pesanan {order_id_update} berhasil diupdate menjadi {new_status}."}
-                    else:
-                        st.session_state.temp_message = {"type": "error", "text": f"Gagal mengupdate status pesanan {order_id_update}."}
-                    st.rerun()
+
 
     elif page == "Laporan Penjualan":
         ui_components.show_header("Laporan Penjualan")
@@ -346,27 +382,9 @@ elif st.session_state.role == 'customer':
     current_cust_username = st.session_state.username
     current_cust_id = auth.extract_cust_id_from_username(current_cust_username)
 
-    if page == "Beranda":
-        ui_components.show_header(f"Selamat Datang, {current_cust_username}!")
+    if page == "Produk":
+        ui_components.show_header(f"Selamat Datang, Customer!")
         st.subheader("Produk Terpopuler Kami")
-        # Untuk display_products_grid, kita perlu mengambil semua produk dulu
-        all_products_list = pm.get_all_products()
-        if all_products_list:
-             # Membuat 2 kolom untuk tampilan card produk
-            cols_cust_home = st.columns(2)
-            for i, product_item_cust in enumerate(all_products_list):
-                with cols_cust_home[i % 2]:
-                    ui_components.display_product_card(
-                        product_item_cust,
-                        st.session_state.role,
-                        auth.extract_cust_id_from_username,
-                        om.create_new_order
-                    )
-        else:
-            st.info("Saat ini belum ada produk yang tersedia.")
-
-    elif page == "Produk":
-        ui_components.show_header("Katalog Produk")
         product_list_cust = pm.get_all_products()
         if product_list_cust:
             # Membuat 2 kolom untuk tampilan card produk
