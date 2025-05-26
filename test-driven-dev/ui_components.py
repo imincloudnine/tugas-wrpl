@@ -138,7 +138,7 @@ def show_header(title):
     st.markdown(f"""
         <div class="header">
             <h1 style="margin:0; display:flex; align-items:center;">
-                <span style="margin-right:10px;">註</span>
+                <span style="margin-right:10px;">💐</span>
                 {title}
             </h1>
         </div>
