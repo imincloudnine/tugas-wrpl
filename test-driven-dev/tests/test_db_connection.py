@@ -23,7 +23,7 @@ class TestDbConnection(unittest.TestCase):
             host="localhost", # Sesuaikan dengan konfigurasi Anda
             user="root",
             password="",
-            database="bshop"
+            database="bouquetshop"
         )
         self.assertEqual(conn, mock_conn_instance) # Pastikan objek koneksi yang dikembalikan adalah mock kita
 
