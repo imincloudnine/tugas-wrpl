@@ -11,7 +11,97 @@ APP_STYLES = """
         max-width: 1200px;
         margin: 0 auto;
     }
-    /* ... (Sertakan semua style CSS Anda di sini) ... */
+.product-card {
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    padding: 15px;
+    margin-bottom: 20px;
+    background: white;
+    transition: transform 0.2s;
+    }
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+    .header {
+        background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+        padding: 20px;
+        border-radius: 10px;
+        color: white;
+        margin-bottom: 20px;
+    }
+    .sidebar .sidebar-content {
+        background: linear-gradient(180deg, #fdfbfb 0%, #ebedee 100%);
+    }
+    .metric-card {
+        background: white;
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    .btn-primary {
+        background-color: #ff6b6b;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 8px 16px;
+        cursor: pointer;
+    }
+    .btn-primary:hover {
+        background-color: #ff5252;
+    }
+    input[type="text"], input[type="number"] {
+        color: white !important;
+        border: 1px solid #ddd !important;
+        border-radius: 8px !important;
+        padding: 6.25px !important;
+        border-top: 1px solid #ddd !important;
+    }
+    .stSelectbox > div > div {
+        color: white !important;
+        border: 1px solid #ddd !important;
+        border-radius: 6px !important;
+    }
+    .stSelectbox div[data-baseweb="select"] {
+        color: white !important;
+        border-radius: 6px !important;
+    }
+    input[type="text"]:focus, input[type="number"]:focus {
+        border-color: #888 !important;
+        outline: none !important;
+    }
+    .stSelectbox div[data-baseweb="select"]:hover {
+        border-color: #888 !important;
+    }
+    .stNumberInput button:hover {
+        background-color: #ddd !important;
+    }
+    .stNumberInput {
+        border-radius: 6px !important;
+    }
+    textarea {
+        color: white !important;
+        border: 1px solid #ddd !important;
+        border-radius: 8px !important;
+        padding: 6.25px !important;
+        border-top: 1px solid #ddd !important;
+    }
+    textarea:focus {
+        border-color: #888 !important;
+        outline: none !important;
+    }
+    input[type="password"] {
+        color: white !important;
+        border: 1px solid #ddd !important;
+        border-radius: 8px !important;
+        padding: 6.25px !important;
+        border-top: 1px solid #ddd !important;
+    }
+    input[type="password"]:focus {
+        border-color: #888 !important;
+        outline: none !important;
+    }
     .metric-card {
         background: white;
         border-radius: 10px;
@@ -163,7 +253,7 @@ def show_order_details_component(order_details_list):
     st.write(f"**Tanggal Pesanan:** {first_item['orderDate']}")
     st.write(f"**Metode Pembayaran:** {first_item['paymentMethod']}")
     st.write(f"**Status:** {first_item['status']}")
-    st.write(f"**Total Pesanan:** Rp {first_item['totalPrice']:, .2f}") # Total harga dari tabel orders
+    st.write(f"**Total Pesanan:** Rp {first_item['totalPrice']:,.2f}") # Total harga dari tabel orders
 
     st.markdown("---")
     st.write("**Daftar Item Pesanan:**")
