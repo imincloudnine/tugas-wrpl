@@ -44,7 +44,7 @@ if st.session_state.temp_message:
 
 # --- Halaman Login/Signup (Jika belum login) ---
 if st.session_state.role is None:
-    ui_components.show_header("💐 Bouquet Shop") # Panggil header dari ui_components
+    ui_components.show_header("Bouquet Shop") # Panggil header dari ui_components
     
     pilihan_awal = st.radio("Silakan pilih:", ("Login", "Sign Up"), horizontal=True, key="login_signup_radio")
     
