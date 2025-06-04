@@ -17,6 +17,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Salin seluruh folder test-driven-dev ke dalam container
 COPY test-driven-dev/ /app
 
+# Set PYTHONPATH supaya Python bisa import modul dari /app
+ENV PYTHONPATH=/app
+
 EXPOSE 8501
 
 ENTRYPOINT ["streamlit", "run"]
