@@ -1,0 +1,40 @@
+name: Docker Compose Test
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      docker:
+        image: docker:24.0.5-cli
+        options: --privileged
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Docker Compose
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y docker-compose
+
+    - name: Build containers
+      run: docker-compose build
+
+    - name: Start containers in background
+      run: docker-compose up -d
+
+    - name: Wait for MySQL to be ready
+      run: |
+        echo "Waiting for MySQL..."
+        until docker exec bouquetshop_db mysqladmin ping --silent; do
+          sleep 2
+        done
+
+    - name: Run tests inside container
+      run: docker exec bouquetshop_app pytest test-driven-dev/tests
+
+    - name: Shutdown containers
+      run: docker-compose down
