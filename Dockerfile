@@ -16,7 +16,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application
 COPY . .
 
+# Set PYTHONPATH supaya Python bisa import modul dari /app
+ENV PYTHONPATH=/app
+
 EXPOSE 8501
 
 # Run streamlit
-ENTRYPOINT ["streamlit", "run", "BouShopApp.py", "--server.port=8501", "--server.address=0.0.0.0"]
+CMD ["streamlit", "run", "BouShopApp.py", "--server.port=8501", "--server.address=0.0.0.0"]
