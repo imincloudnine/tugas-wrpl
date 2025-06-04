@@ -7,7 +7,7 @@ services:
     ports:
       - "8501:8501"
     volumes:
-      - .:/app
+      - ./test-driven-dev:/app
     depends_on:
       - db
     environment:
