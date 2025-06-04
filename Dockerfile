@@ -22,5 +22,4 @@ ENV PYTHONPATH=/app
 
 EXPOSE 8501
 
-ENTRYPOINT ["streamlit", "run"]
-CMD ["BouShopApp.py", "--server.port=8501", "--server.address=0.0.0.0"]
+CMD ["streamlit", "run", "test-driven-dev/BouShopApp.py", "--server.port=8501", "--server.address=0.0.0.0"]
