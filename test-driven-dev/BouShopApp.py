@@ -170,9 +170,6 @@ if st.session_state.role == 'admin':
         ui_components.show_header("Manajemen Produk")
         tab1, tab2, tab3 = st.tabs(["Daftar Produk", "Update Stok", "Update Harga"])
 
-        # Gunakan indeks dari session_state.active_tab
-        tab_idx = tab_names.index(st.session_state.active_tab)
-
         with tab1:
             st.subheader("Daftar Produk")
             product_list = pm.get_all_products() # Menggunakan dictionary=True dari pm
@@ -205,7 +202,7 @@ if st.session_state.role == 'admin':
             else:
                 st.warning("Tidak ada bunga untuk dipilih.")
 
-            with tabs[tab_idx]:
+            with tab3:
                 if st.session_state.active_tab == "Update Harga":
                     st.subheader("Update Harga Bunga")
                 
