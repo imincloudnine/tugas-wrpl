@@ -16,23 +16,19 @@ def get_all_products():
     finally:
         if conn and conn.is_connected():
             conn.close()
-
-def update_stock(bungaID, tambahStock): # Diambil dari stock_logic.py Anda
+            
+# Fungsi untuk memperbarui stok produk
+def update_stock(bungaID, tambahStock):
     conn = get_connection()
     try:
         with conn.cursor() as cursor:
-            # Panggil stored procedure UpdateProductStock
-            # Pastikan stored procedure ini ada dan berfungsi dengan benar di MySQL
             cursor.callproc("UpdateProductStock", (bungaID, tambahStock))
             conn.commit()
-            return True # Berhasil
+            st.success(f"Stok bunga berhasil ditambahkan sebanyak {tambahStock} tangkai!")
     except mysql.connector.Error as err:
-        print(f"Database error in update_stock: {err}")
-        return False # Gagal
+        st.error(f"Error: {err}")
     finally:
-        if conn and conn.is_connected():
-            conn.close()
-
+        conn.close()
 
 def get_bunga_list():
     conn = get_connection()
