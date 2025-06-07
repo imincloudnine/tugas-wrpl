@@ -202,49 +202,25 @@ if st.session_state.role == 'admin':
             else:
                 st.warning("Tidak ada bunga untuk dipilih.")
 
-            with tab3:
-                if st.session_state.active_tab == "Update Harga":
-                    st.subheader("Update Harga Bunga")
-                
-                    # Simulasi bunga list
-                    bunga_options_harga = {"Mawar": 1, "Melati": 2}
-                    selected_bunga_name_hrg = st.selectbox(
-                        "Pilih Bunga",
-                        list(bunga_options_harga.keys()),
-                        key="harga_select_bunga"
-                    )
-                    selected_bunga_id_hrg = bunga_options_harga[selected_bunga_name_hrg]
-                
-                    new_price_val = st.number_input(
-                        "Harga Baru per Tangkai",
-                        min_value=0.0,
-                        step=1000.0,
-                        format="%.2f",
-                        key="harga_input_val"
-                    )
-                
-                    if st.button("Update Harga", key="update_harga_btn_admin"):
-                        # Simulasi update sukses
-                        st.session_state.temp_message = {
-                            "type": "success",
-                            "text": f"Harga {selected_bunga_name_hrg} berhasil diupdate."
-                        }
-                        # Tetap di tab ini saat rerun
-                        st.session_state.active_tab = "Update Harga"
-                        st.experimental_rerun()
-                
-            # Tetapkan tab aktif saat pertama kali di-click
-            for i, tab in enumerate(tabs):
-                with tab:
-                    if st.button(f"Ke {tab_names[i]}", key=f"goto_tab_{i}"):
-                        st.session_state.active_tab = tab_names[i]
-                        st.experimental_rerun()
-                
-            # Tampilkan pesan (jika ada)
-            if "temp_message" in st.session_state:
-                msg = st.session_state.pop("temp_message")
-                if msg["type"] == "success":
-                    st.success(msg["text"])
+        with tab3:
+            st.subheader("Update Harga Bunga")
+            bunga_options_harga = {b['bungaName']: b['bungaID'] for b in pm.get_bunga_list()}
+            if bunga_options_harga:
+                selected_bunga_name_hrg = st.selectbox("Pilih Bunga", list(bunga_options_harga.keys()), key="harga_select_bunga")
+                selected_bunga_id_hrg = bunga_options_harga[selected_bunga_name_hrg]
+                new_price_val = st.number_input("Harga Baru per Tangkai", min_value=0.0, step=1000.0, format="%.2f", key="harga_input_val")
+
+                if st.button("Update Harga", key="update_harga_btn_admin"):
+                    if selected_bunga_id_hrg and new_price_val >= 0:
+                        success = pm.update_bunga_price(selected_bunga_id_hrg, new_price_val)
+                        if success:
+                            st.session_state.temp_message = {"type": "success", "text": f"Harga {selected_bunga_name_hrg} berhasil diupdate."}
+                        else:
+                            st.session_state.temp_message = {"type": "error", "text": "Gagal memperbarui harga."}
+                        st.rerun()
+            else:
+                st.warning("Tidak ada bunga untuk dipilih.")
+
 
     elif page == "Pelanggan":
         ui_components.show_header("Manajemen Pelanggan")
