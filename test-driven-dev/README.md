@@ -3,3 +3,5 @@
 2. Atika Dwi Aryanti
 4. Iffa Hesti Adlik Putri
 5. Kartika Adhi Ning W S
+## DEPLOYED PROTOTYPE
+https://tugas-wrpl-bouquetshop.onrender.com/
