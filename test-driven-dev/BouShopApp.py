@@ -396,12 +396,18 @@ elif st.session_state.role == 'customer':
             cols_cust_prod = st.columns(2)
             for i, product_item_data in enumerate(product_list_cust):
                 with cols_cust_prod[i % 2]:
-                    ui_components.display_product_card(
+                    order_result = ui_components.display_product_card(
                         product_item_data,
                         st.session_state.role,
                         auth.extract_cust_id_from_username,
                         om.create_new_order
                     )
+
+                    # Jika ada hasil pemesanan dan sukses, tampilkan pesan
+                    if order_result and order_result.get("success"):
+                        st.success(order_result["message"])
+                    elif order_result and not order_result.get("success"):
+                        st.error(order_result["message"])
         else:
             st.info("Tidak ada produk yang tersedia saat ini.")
 
