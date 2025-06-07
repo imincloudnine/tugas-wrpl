@@ -8,7 +8,7 @@ class TestDbConnection(unittest.TestCase):
 
     @patch.dict(os.environ, {
         "DB_HOST": "tramway.proxy.rlwy.net",
-        "DB_PORT": "3306",
+        "DB_PORT": "11156",
         "DB_USER": "root",
         "DB_PASSWORD": "ZhFdrGfWRkSniHUZkVfxAuFWBSgiPdMw",
         "DB_NAME": "bouquetshop"
@@ -22,7 +22,7 @@ class TestDbConnection(unittest.TestCase):
         
         mock_mysql_connect.assert_called_once_with(
             host="tramway.proxy.rlwy.net",
-            port=3306,
+            port=11156,
             user="root",
             password="ZhFdrGfWRkSniHUZkVfxAuFWBSgiPdMw",
             database="bouquetshop"
@@ -31,7 +31,7 @@ class TestDbConnection(unittest.TestCase):
 
     @patch.dict(os.environ, {
         "DB_HOST": "tramway.proxy.rlwy.net",
-        "DB_PORT": "3306",
+        "DB_PORT": "11156",
         "DB_USER": "root",
         "DB_PASSWORD": "ZhFdrGfWRkSniHUZkVfxAuFWBSgiPdMw",
         "DB_NAME": "bouquetshop"
