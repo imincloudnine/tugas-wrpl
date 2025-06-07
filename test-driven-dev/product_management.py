@@ -24,7 +24,6 @@ def update_stock(bungaID, tambahStock):
         with conn.cursor() as cursor:
             cursor.callproc("UpdateProductStock", (bungaID, tambahStock))
             conn.commit()
-            st.success(f"Stok bunga berhasil ditambahkan sebanyak {tambahStock} tangkai!")
     except mysql.connector.Error as err:
         st.error(f"Error: {err}")
     finally:
