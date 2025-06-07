@@ -5,3 +5,5 @@ BouquetShop - Platform pembelian buket bunga dengan request custom dari pengguna
 2. Atika Dwi Aryanti
 4. Iffa Hesti Adlik Putri
 5. Kartika Adhi Ning W S
+## Deployed Prototype
+https://tugas-wrpl-bouquetshop.onrender.com/ 
