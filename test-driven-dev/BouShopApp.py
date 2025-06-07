@@ -484,6 +484,3 @@ elif st.session_state.role == 'customer':
                             st.rerun() # Untuk menampilkan pesan
         else:
             st.error("Tidak dapat memuat informasi akun. Customer ID tidak valid.")
-
-if __name__ == "__main__":
-    main()
