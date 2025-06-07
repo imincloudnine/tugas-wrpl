@@ -17,15 +17,17 @@ def get_all_products():
         if conn and conn.is_connected():
             conn.close()
             
-# Fungsi untuk memperbarui stok produk
 def update_stock(bungaID, tambahStock):
     conn = get_connection()
     try:
         with conn.cursor() as cursor:
             cursor.callproc("UpdateProductStock", (bungaID, tambahStock))
             conn.commit()
+        return True
     except mysql.connector.Error as err:
-        st.error(f"Error: {err}")
+        # Jangan pakai st.error() di sini
+        print(f"Error: {err}")
+        return False
     finally:
         conn.close()
 
