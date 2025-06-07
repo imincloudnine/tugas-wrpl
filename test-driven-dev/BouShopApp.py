@@ -265,7 +265,7 @@ if st.session_state.role == 'admin':
                 kuantitasTangkai = st.number_input("Jumlah Tangkai", min_value=1, max_value=10, step=1)
                 custom = st.selectbox("Warna Custom", ["Pink", "Brown", "Blue", "Green", "Grey", "Yellow", "White", "Purple"])
                 if st.button("Buat Pesanan", type="primary", key="new_order_btn"):
-                    result = om.create_new_order(custID, paymentMethod, bungaID, kuantitasTangkai, custom)
+                    result = om.create_new_order(custID, paymentMethod, selected_bunga['bungaID'], kuantitasTangkai, custom)
                     if result["success"]:
                         st.success(result["message"])
                     else:
