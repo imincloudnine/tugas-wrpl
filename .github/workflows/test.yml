@@ -34,7 +34,7 @@ jobs:
         done
 
     - name: Run tests inside container
-      run: docker exec bouquetshop_app pytest test-driven-dev/tests/
+      run: docker exec bouquetshop_app pytest
 
     - name: Shutdown containers
       run: docker-compose down
